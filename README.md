@@ -256,4 +256,4 @@ Refresh the app several times — requests should appear on both servers confirm
 
 ## Author
 
-Built by [Your Name] as part of a university assignment on API integration and web server deployment.
+Built by Miracle Chidozie as part of a university assignment on API integration and web server deployment.
