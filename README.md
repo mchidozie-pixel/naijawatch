@@ -1,6 +1,6 @@
 # 🇳🇬 NaijaWatch — Nigeria Safety Explorer
 
-A web application that allows users to explore crime and safety data across 21 major Nigerian cities. Built with HTML, CSS, and JavaScript using real data from the World Bank API — no backend required.
+A web application that allows users to explore crime and safety data across 21 major Nigerian cities. Built with HTML, CSS, and JavaScript using real data from the World Bank API no backend required.
 
 ---
 
@@ -73,7 +73,7 @@ e
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/YOUR_USERNAME/naijawatch.git
+git clone https://github.com/mchidozie-pixel/naijawatch.git
 ```
 
 2. Navigate into the project folder:
@@ -100,7 +100,7 @@ cd naijawatch
 
 SSH into Web01:
 ```bash
-ssh ubuntu@<WEB01_IP>
+ssh ubuntu@44.201.79.14
 ```
 
 Install Nginx:
@@ -144,7 +144,7 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-Test: Visit `http://<WEB01_IP>` in your browser.
+Test: Visit `http://44.201.79.14` in your browser.
 
 ---
 
@@ -152,12 +152,12 @@ Test: Visit `http://<WEB01_IP>` in your browser.
 
 Repeat the exact same steps on Web02:
 ```bash
-ssh ubuntu@<WEB02_IP>
+ssh ubuntu@3.86.212.68
 ```
 
 Run all the same commands as Web01.
 
-Test: Visit `http://<WEB02_IP>` in your browser.
+Test: Visit `http://3.86.212.68` in your browser.
 
 ---
 
@@ -165,7 +165,7 @@ Test: Visit `http://<WEB02_IP>` in your browser.
 
 SSH into Lb01:
 ```bash
-ssh ubuntu@<LB01_IP>
+ssh ubuntu@3.85.162.15
 ```
 
 Install Nginx:
@@ -182,8 +182,8 @@ sudo nano /etc/nginx/sites-available/naijawatch-lb
 Paste this (replace with your actual IPs):
 ```nginx
 upstream naijawatch_backend {
-    server <WEB01_IP>;
-    server <WEB02_IP>;
+    server 44.201.79.14;
+    server 3.86.212.68;
 }
 
 server {
@@ -207,7 +207,7 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-Test: Visit `http://<LB01_IP>` — the app loads and traffic is split between Web01 and Web02.
+Test: Visit `http://3.85.162.15` — the app loads and traffic is split between Web01 and Web02.
 
 ---
 
