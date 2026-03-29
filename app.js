@@ -1,3 +1,6 @@
+// ─── NEWS API KEY ─────────────────────────────────────────────────────────────
+const NEWS_API_KEY = '218e93840d174d45975df114e169293b';
+
 // ─── NIGERIA CITIES DATA ──────────────────────────────────────────────────────
 // Real data sourced from Numbeo public reports, ACLED, and Nigeria Security Tracker
 const CITIES = [
@@ -395,7 +398,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderCityList();
   initCompareControls();
   setWelcomeStats();
-  fetchWorldBankData(); // pre-fetch for speed
+  fetchWorldBankData();
 });
 
 // ─── MAP SETUP ────────────────────────────────────────────────────────────────
@@ -415,20 +418,11 @@ function renderMarkers() {
   displayedCities.forEach(city => {
     const color = getSafetyColor(city.safetyScore);
     const icon = L.divIcon({
-      html: `
-        <div style="
-          width: 14px; height: 14px;
-          background: ${color};
-          border-radius: 50%;
-          border: 2px solid rgba(255,255,255,0.4);
-          box-shadow: 0 0 8px ${color}99;
-          cursor: pointer;
-        "></div>`,
+      html: `<div style="width:14px;height:14px;background:${color};border-radius:50%;border:2px solid rgba(255,255,255,0.4);box-shadow:0 0 8px ${color}99;cursor:pointer;"></div>`,
       className: '',
       iconSize: [14, 14],
       iconAnchor: [7, 7]
     });
-
     L.marker([city.lat, city.lng], { icon })
       .addTo(markerLayer)
       .bindTooltip(`<strong>${city.name}</strong><br/>Safety: ${city.safetyScore}/100`, {
@@ -441,20 +435,16 @@ function renderMarkers() {
 // ─── CITY LIST RENDER ─────────────────────────────────────────────────────────
 function renderCityList() {
   const el = document.getElementById('cityList');
-
   if (!displayedCities.length) {
     el.innerHTML = `<div class="empty-state">No cities match your search.</div>`;
     document.getElementById('cityCount').textContent = '0';
     return;
   }
-
   document.getElementById('cityCount').textContent = displayedCities.length;
-
   el.innerHTML = displayedCities.map((city, i) => {
     const scoreClass = getSafetyClass(city.safetyScore);
     const color = getSafetyColor(city.safetyScore);
     const delay = Math.min(i * 0.04, 1);
-
     return `
       <div class="city-card ${selectedCity?.name === city.name ? 'active' : ''}"
            style="animation-delay:${delay}s"
@@ -468,43 +458,27 @@ function renderCityList() {
           <span>${city.state}</span>
         </div>
         <div class="city-mini-bar" style="width:${city.safetyScore}%;background:${color}"></div>
-      </div>
-    `;
+      </div>`;
   }).join('');
 }
 
 // ─── SHOW CITY DETAIL ─────────────────────────────────────────────────────────
 function showCityDetail(city) {
   selectedCity = city;
-
-  // Hide welcome, show detail
   document.getElementById('welcomeScreen').style.display = 'none';
   document.getElementById('detailPanel').style.display = 'block';
-
-  // Populate header
   document.getElementById('detailCity').textContent = city.name;
   document.getElementById('detailRegion').textContent = `${city.region} · ${city.state} · Nigeria`;
-
-  // Safety score
   document.getElementById('detailSafety').textContent = city.safetyScore;
   document.getElementById('safetyBar').style.width = city.safetyScore + '%';
-
-  // Crime index
   document.getElementById('detailCrime').textContent = city.crimeIndex.toFixed(1);
   document.getElementById('crimeBar').style.width = city.crimeIndex + '%';
-
-  // Population
   document.getElementById('detailPop').textContent = city.population;
-
-  // Safety rank
   const sorted = [...CITIES].sort((a, b) => b.safetyScore - a.safetyScore);
   const rank = sorted.findIndex(c => c.name === city.name) + 1;
   document.getElementById('detailRank').textContent = `#${rank}`;
-
-  // Crime breakdown
   renderBreakdown(city);
 
-  // ensure comparison follows current city
   const selectA = document.getElementById('compareCityA');
   if (selectA) {
     selectA.value = city.name;
@@ -517,22 +491,56 @@ function showCityDetail(city) {
     if (selectB) selectB.value = compareCityB.name;
   }
   renderCompare();
-
-  // Map focus
   map.setView([city.lat, city.lng], 12);
-
-  // Refresh city list to show active state
   renderCityList();
-
-  // Load World Bank chart
   loadTrendChart();
+
+  // Fetch live news for this city
+  fetchCityNews(city.name);
+}
+
+// ─── FETCH NEWS FROM NEWSAPI ──────────────────────────────────────────────────
+async function fetchCityNews(cityName) {
+  const newsSection = document.getElementById('newsSection');
+  const newsList = document.getElementById('newsList');
+
+  newsSection.style.display = 'block';
+  newsList.innerHTML = `
+    <div class="loading">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>`;
+
+  try {
+    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(cityName + ' Nigeria')}&language=en&sortBy=publishedAt&pageSize=5&apiKey=${NEWS_API_KEY}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('News API error');
+    const data = await res.json();
+
+    if (!data.articles || data.articles.length === 0) {
+      newsList.innerHTML = `<div class="empty-state">No recent news found for ${cityName}.</div>`;
+      return;
+    }
+
+    newsList.innerHTML = data.articles.map(article => `
+      <div class="news-card" onclick="window.open('${article.url}', '_blank')">
+        <div class="news-source">${article.source.name} · ${new Date(article.publishedAt).toLocaleDateString()}</div>
+        <div class="news-title">${article.title}</div>
+        <div class="news-desc">${article.description ? article.description.slice(0, 100) + '...' : ''}</div>
+      </div>
+    `).join('');
+
+  } catch (err) {
+    newsList.innerHTML = `<div class="empty-state">Could not load news. Please check your connection.</div>`;
+    console.error('NewsAPI error:', err);
+  }
 }
 
 // ─── CRIME BREAKDOWN ──────────────────────────────────────────────────────────
 function renderBreakdown(city) {
   const el = document.getElementById('breakdownList');
   const colors = ['#ff4757', '#ff6b81', '#ffa502', '#ffd43b', '#a29bfe', '#74b9ff'];
-
   el.innerHTML = Object.entries(city.breakdown).map(([label, val], i) => `
     <div class="breakdown-item">
       <div class="breakdown-label">${label}</div>
@@ -540,8 +548,7 @@ function renderBreakdown(city) {
         <div class="breakdown-bar" style="width:${val}%;background:${colors[i % colors.length]}"></div>
       </div>
       <div class="breakdown-val">${val}</div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 // ─── CLOSE DETAIL ─────────────────────────────────────────────────────────────
@@ -549,6 +556,7 @@ function closeDetail() {
   selectedCity = null;
   document.getElementById('detailPanel').style.display = 'none';
   document.getElementById('welcomeScreen').style.display = 'flex';
+  document.getElementById('newsSection').style.display = 'none';
   map.setView([9.082, 8.6753], 6);
   renderCityList();
 }
@@ -562,25 +570,16 @@ async function fetchWorldBankData() {
     const res = await fetch(url);
     if (!res.ok) throw new Error('World Bank API failed');
     const json = await res.json();
-    // json[1] is the data array
-    const data = json[1]
-      .filter(d => d.value !== null)
-      .sort((a, b) => a.date - b.date);
+    const data = json[1].filter(d => d.value !== null).sort((a, b) => a.date - b.date);
     wbData = data;
   } catch (err) {
     console.warn('World Bank fetch failed, using fallback data', err);
-    // Fallback static data if API fails
     wbData = [
-      { date: '2010', value: 3.0 },
-      { date: '2011', value: 3.2 },
-      { date: '2012', value: 3.1 },
-      { date: '2013', value: 3.4 },
-      { date: '2014', value: 3.3 },
-      { date: '2015', value: 3.2 },
-      { date: '2016', value: 3.5 },
-      { date: '2017', value: 3.6 },
-      { date: '2018', value: 3.4 },
-      { date: '2019', value: 3.3 },
+      { date: '2010', value: 3.0 }, { date: '2011', value: 3.2 },
+      { date: '2012', value: 3.1 }, { date: '2013', value: 3.4 },
+      { date: '2014', value: 3.3 }, { date: '2015', value: 3.2 },
+      { date: '2016', value: 3.5 }, { date: '2017', value: 3.6 },
+      { date: '2018', value: 3.4 }, { date: '2019', value: 3.3 },
       { date: '2020', value: 3.1 },
     ];
   }
@@ -589,19 +588,14 @@ async function fetchWorldBankData() {
 function loadTrendChart() {
   const draw = () => {
     if (!wbData) { setTimeout(draw, 500); return; }
-
     const isCity = document.querySelector('input[name="trendType"]:checked').value === 'city';
     const labels = wbData.map(d => d.date);
     let values = wbData.map(d => parseFloat(d.value).toFixed(2));
-
     if (isCity && selectedCity) {
-      // Simulate city trend: adjust national by city's safety factor
-      const factor = (100 - selectedCity.safetyScore) / 100; // higher risk = higher factor
+      const factor = (100 - selectedCity.safetyScore) / 100;
       values = values.map(v => (parseFloat(v) * (1 + factor * 0.5)).toFixed(2));
     }
-
     if (trendChart) trendChart.destroy();
-
     const ctx = document.getElementById('trendChart').getContext('2d');
     trendChart = new Chart(ctx, {
       type: 'line',
@@ -629,48 +623,33 @@ function loadTrendChart() {
             bodyColor: '#7777aa',
             borderColor: '#252535',
             borderWidth: 1,
-            callbacks: {
-              label: ctx => ` ${ctx.parsed.y} per 100,000 people`
-            }
+            callbacks: { label: ctx => ` ${ctx.parsed.y} per 100,000 people` }
           }
         },
         scales: {
-          x: {
-            grid: { color: '#252535' },
-            ticks: { color: '#7777aa', font: { size: 11 } }
-          },
+          x: { grid: { color: '#252535' }, ticks: { color: '#7777aa', font: { size: 11 } } },
           y: {
             grid: { color: '#252535' },
             ticks: { color: '#7777aa', font: { size: 11 } },
-            title: {
-              display: true,
-              text: 'Per 100,000',
-              color: '#7777aa',
-              font: { size: 10 }
-            }
+            title: { display: true, text: 'Per 100,000', color: '#7777aa', font: { size: 10 } }
           }
         }
       }
     });
   };
-
   draw();
 }
 
-// ─── FILTER CITIES ────────────────────────────────────────────────────────────
+// ─── FILTER & SORT ────────────────────────────────────────────────────────────
 function filterCities() {
   const query = document.getElementById('citySearch').value.toLowerCase().trim();
   const region = document.getElementById('regionSelect').value;
   const sort = document.getElementById('sortSelect').value;
-
   displayedCities = CITIES.filter(city => {
-    const matchQuery = !query ||
-      city.name.toLowerCase().includes(query) ||
-      city.state.toLowerCase().includes(query);
+    const matchQuery = !query || city.name.toLowerCase().includes(query) || city.state.toLowerCase().includes(query);
     const matchRegion = region === 'all' || city.region === region;
     return matchQuery && matchRegion;
   });
-
   applySortOrder(sort);
   renderCityList();
   renderMarkers();
@@ -683,19 +662,10 @@ function sortAndRender() {
 }
 
 function applySortOrder(sort) {
-  if (sort === 'danger') {
-    displayedCities.sort((a, b) => a.safetyScore - b.safetyScore);
-  } else if (sort === 'safe') {
-    displayedCities.sort((a, b) => b.safetyScore - a.safetyScore);
-  } else if (sort === 'name') {
-    displayedCities.sort((a, b) => a.name.localeCompare(b.name));
-  } else if (sort === 'population') {
-    displayedCities.sort((a, b) => {
-      const pa = parseFloat(a.population);
-      const pb = parseFloat(b.population);
-      return pb - pa;
-    });
-  }
+  if (sort === 'danger') displayedCities.sort((a, b) => a.safetyScore - b.safetyScore);
+  else if (sort === 'safe') displayedCities.sort((a, b) => b.safetyScore - a.safetyScore);
+  else if (sort === 'name') displayedCities.sort((a, b) => a.name.localeCompare(b.name));
+  else if (sort === 'population') displayedCities.sort((a, b) => parseFloat(b.population) - parseFloat(a.population));
 }
 
 // ─── WELCOME STATS ────────────────────────────────────────────────────────────
@@ -706,39 +676,25 @@ function setWelcomeStats() {
   document.getElementById('wDanger').textContent = riskiest.name;
 }
 
+// ─── COMPARE ──────────────────────────────────────────────────────────────────
 function initCompareControls() {
   const selectA = document.getElementById('compareCityA');
   const selectB = document.getElementById('compareCityB');
-
-  // fill selects once
   selectA.innerHTML = CITIES.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
   selectB.innerHTML = CITIES.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-
-  selectA.addEventListener('change', () => {
-    compareCityA = CITIES.find(c => c.name === selectA.value);
-    renderCompare();
-  });
-
-  selectB.addEventListener('change', () => {
-    compareCityB = CITIES.find(c => c.name === selectB.value);
-    renderCompare();
-  });
-
-  selectA.value = selectedCity?.name || CITIES[0].name;
-  selectB.value = (selectedCity?.name === CITIES[0].name ? CITIES[1].name : CITIES[0].name);
-  compareCityA = CITIES.find(c => c.name === selectA.value);
-  compareCityB = CITIES.find(c => c.name === selectB.value);
+  selectA.addEventListener('change', () => { compareCityA = CITIES.find(c => c.name === selectA.value); renderCompare(); });
+  selectB.addEventListener('change', () => { compareCityB = CITIES.find(c => c.name === selectB.value); renderCompare(); });
+  selectA.value = CITIES[0].name;
+  selectB.value = CITIES[1].name;
+  compareCityA = CITIES[0];
+  compareCityB = CITIES[1];
   renderCompare();
 }
 
 function renderCompare() {
   if (!compareCityA || !compareCityB) return;
-
-  const cardA = document.getElementById('compareCardA');
-  const cardB = document.getElementById('compareCardB');
-
-  cardA.innerHTML = generateCompareCard(compareCityA);
-  cardB.innerHTML = generateCompareCard(compareCityB);
+  document.getElementById('compareCardA').innerHTML = generateCompareCard(compareCityA);
+  document.getElementById('compareCardB').innerHTML = generateCompareCard(compareCityB);
 }
 
 function generateCompareCard(city) {
@@ -749,34 +705,23 @@ function generateCompareCard(city) {
     <div class="compare-value">Population ${city.population}</div>
     <div class="compare-breakdown">
       ${Object.entries(city.breakdown).map(([k, v]) => `<div>${k}: ${v}%</div>`).join('')}
-    </div>
-  `;
+    </div>`;
 }
 
 function exportComparison() {
-  if (!compareCityA || !compareCityB) {
-    alert('Please select two cities to compare.');
-    return;
-  }
-
+  if (!compareCityA || !compareCityB) { alert('Please select two cities to compare.'); return; }
   const csv = [
     ['Metric', compareCityA.name, compareCityB.name],
     ['Safety Score', compareCityA.safetyScore, compareCityB.safetyScore],
     ['Crime Index', compareCityA.crimeIndex, compareCityB.crimeIndex],
     ['Population', compareCityA.population, compareCityB.population],
-    ...Object.keys(compareCityA.breakdown).map(key => [
-      key,
-      compareCityA.breakdown[key],
-      compareCityB.breakdown[key]
-    ])
+    ...Object.keys(compareCityA.breakdown).map(key => [key, compareCityA.breakdown[key], compareCityB.breakdown[key]])
   ];
-
-  const csvContent = csv.map(row => row.join(',')).join('\n');
-  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const blob = new Blob([csv.map(r => r.join(',')).join('\n')], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${compareCityA.name}_vs_${compareCityB.name}_comparison.csv`;
+  a.download = `${compareCityA.name}_vs_${compareCityB.name}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
