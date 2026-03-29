@@ -22,7 +22,7 @@
   </div>
   <div class="header-right">
     <span class="live-dot"></span>
-    <span class="live-label">Live World Bank Data</span>
+    <span class="live-label">Live World Bank & News Data</span>
   </div>
 </header>
 
@@ -30,7 +30,6 @@
 
   <!-- LEFT PANEL -->
   <aside class="panel">
-
     <div class="section">
       <h2 class="section-title">Explore Nigeria</h2>
       <div class="search-wrap">
@@ -73,12 +72,10 @@
       Cities <span id="cityCount" class="count-badge">21</span>
     </div>
     <div class="city-list" id="cityList"></div>
-
   </aside>
 
   <!-- RIGHT PANEL -->
   <main class="main">
-
     <div class="map-wrap">
       <div id="map"></div>
     </div>
@@ -93,36 +90,17 @@
         <button class="close-btn" onclick="closeDetail()">✕</button>
       </div>
 
-      <div class="compare-section">
-        <div class="compare-header">
-          <h3 class="sub-title">🏙️ City Comparison</h3>
-          <button class="export-btn" onclick="exportComparison()" title="Export as CSV"><i class="fas fa-download"></i></button>
-        </div>
-        <div class="compare-controls">
-          <select id="compareCityA"></select>
-          <span>vs</span>
-          <select id="compareCityB"></select>
-        </div>
-        <div class="compare-grid" id="compareGrid">
-          <div class="compare-card" id="compareCardA"></div>
-          <div class="compare-card" id="compareCardB"></div>
-        </div>
-      </div>
-
+      <!-- SCORE GRID -->
       <div class="score-grid">
         <div class="score-card">
           <div class="score-num green" id="detailSafety">—</div>
           <div class="score-label">Safety Score</div>
-          <div class="score-bar-wrap">
-            <div class="score-bar green-bar" id="safetyBar"></div>
-          </div>
+          <div class="score-bar-wrap"><div class="score-bar green-bar" id="safetyBar"></div></div>
         </div>
         <div class="score-card">
           <div class="score-num red" id="detailCrime">—</div>
           <div class="score-label">Crime Index</div>
-          <div class="score-bar-wrap">
-            <div class="score-bar red-bar" id="crimeBar"></div>
-          </div>
+          <div class="score-bar-wrap"><div class="score-bar red-bar" id="crimeBar"></div></div>
         </div>
         <div class="score-card">
           <div class="score-num blue" id="detailPop">—</div>
@@ -134,11 +112,41 @@
         </div>
       </div>
 
+      <!-- CRIME BREAKDOWN -->
       <div class="breakdown-section">
         <h3 class="sub-title">Crime Breakdown</h3>
         <div class="breakdown-list" id="breakdownList"></div>
       </div>
 
+      <!-- LIVE NEWS SECTION -->
+      <div class="news-section" id="newsSection" style="display:none">
+        <h3 class="sub-title">
+          📰 Live News
+          <span class="news-badge">NewsAPI</span>
+        </h3>
+        <div class="news-list" id="newsList"></div>
+      </div>
+
+      <!-- COMPARE SECTION -->
+      <div class="compare-section">
+        <div class="compare-header">
+          <h3 class="sub-title">🏙️ City Comparison</h3>
+          <button class="export-btn" onclick="exportComparison()" title="Export as CSV">
+            <i class="fas fa-download"></i>
+          </button>
+        </div>
+        <div class="compare-controls">
+          <select id="compareCityA"></select>
+          <span>vs</span>
+          <select id="compareCityB"></select>
+        </div>
+        <div class="compare-grid">
+          <div class="compare-card" id="compareCardA"></div>
+          <div class="compare-card" id="compareCardB"></div>
+        </div>
+      </div>
+
+      <!-- TREND CHART -->
       <div class="chart-section">
         <h3 class="sub-title">
           📈 Crime Trend
@@ -149,9 +157,7 @@
           <label><input type="radio" name="trendType" value="city" onchange="loadTrendChart()"> City Estimate</label>
         </div>
         <canvas id="trendChart"></canvas>
-        <p class="chart-note">
-          Source: World Bank — Intentional homicides per 100,000 people
-        </p>
+        <p class="chart-note">Source: World Bank — Intentional homicides per 100,000 people</p>
       </div>
     </div>
 
@@ -159,7 +165,7 @@
     <div class="welcome" id="welcomeScreen">
       <div class="welcome-icon">🇳🇬</div>
       <h2>Welcome to NaijaWatch</h2>
-      <p>Click any city on the map or from the list to explore safety scores, crime breakdowns, and national trends powered by real World Bank data.</p>
+      <p>Click any city on the map or from the list to explore safety scores, live news, crime breakdowns, and national trends.</p>
       <div class="welcome-stats">
         <div class="w-stat"><span>21</span><small>Cities tracked</small></div>
         <div class="w-stat"><span id="wSafe">—</span><small>Safest city</small></div>
