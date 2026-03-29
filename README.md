@@ -1,12 +1,12 @@
 # 🇳🇬 NaijaWatch — Nigeria Safety Explorer
 
-A web application that allows users to explore crime and safety data across 21 major Nigerian cities. Built with HTML, CSS, and JavaScript using real data from the World Bank API no backend required.
+A web application that allows users to explore crime and safety data across 21 major Nigerian cities. Built with HTML, CSS, and JavaScript using real data from the World Bank API and NewsAPI — no backend required.
 
 ---
 
 ## Purpose
 
-NaijaWatch helps Nigerians and visitors make informed decisions about safety across different cities in Nigeria. Users can search, filter, sort, and compare cities by safety score, view detailed crime breakdowns including kidnapping rates, toggle between national and city-estimated crime trends, and export comparison data — all powered by live World Bank data.
+NaijaWatch helps Nigerians and visitors make informed decisions about safety across different cities in Nigeria. Users can search, filter, sort, and compare cities by safety score, view detailed crime breakdowns including kidnapping rates, read live news headlines for each city, toggle between national and city-estimated crime trends, and export comparison data — all powered by live World Bank and NewsAPI data.
 
 ---
 
@@ -14,41 +14,50 @@ NaijaWatch helps Nigerians and visitors make informed decisions about safety acr
 
 - Interactive map of Nigeria with 21 cities marked in green/yellow/red
 - Search cities by name or state
-- 🔽 Filter by region (South West, South East, South South, North West, North East, North Central)
+- Filter by region (South West, South East, South South, North West, North East, North Central)
 - Sort by most dangerous, safest, name A–Z, or population size
 - Click any city to see:
   - Safety score and crime index with animated progress bars
   - Safety rank out of all 21 cities
   - Full crime breakdown: Robbery, Violent Crime, Drug Related, Vandalism, Corruption, Home Break-ins, and Kidnapping
--  **City Comparison Tool** — compare any two cities side by side
-- **Export as CSV** — download the comparison data as a spreadsheet
-- **Crime Trend Chart** — toggle between Nigeria national data and city-level estimates
+- 📰 **Live News Headlines** — real-time news for each city powered by NewsAPI
+- 🆚 **City Comparison Tool** — compare any two cities side by side
+- 📥 **Export as CSV** — download the comparison data as a spreadsheet
+- 📈 **Crime Trend Chart** — toggle between Nigeria national data and city-level estimates
 - Live homicide trend data from the World Bank API with automatic fallback if API is unavailable
 
 ---
 
 ## APIs & Libraries Used
 
-### 1. World Bank API
+### 1. NewsAPI ⭐ (Primary External API)
+- **URL:** https://newsapi.org/
+- **Endpoint:** `https://newsapi.org/v2/everything?q={city}+Nigeria&language=en&sortBy=publishedAt&pageSize=5&apiKey={API_KEY}`
+- **What it provides:** Live real-time news headlines for each Nigerian city
+- **Cost:** Free tier (developer plan)
+- **API Key:** Provided in submission comment section
+- **Documentation:** https://newsapi.org/docs
+
+### 2. World Bank API
 - **URL:** https://api.worldbank.org/v2/
 - **Endpoint:** `https://api.worldbank.org/v2/country/NG/indicator/VC.IHR.PSRC.P5?format=json&per_page=20&mrv=15`
 - **What it provides:** Nigeria intentional homicide rates per 100,000 people over 15 years
 - **Cost:** 100% free, no API key required
 - **Documentation:** https://datahelpdesk.worldbank.org/knowledgebase/articles/889392
 
-### 2. OpenStreetMap / Leaflet.js
+### 3. OpenStreetMap / Leaflet.js
 - **URL:** https://www.openstreetmap.org/
 - **What it provides:** Free interactive map tiles for the Nigeria map
 - **Cost:** 100% free, no API key required
 - **Documentation:** https://leafletjs.com/
 
-### 3. Chart.js
+### 4. Chart.js
 - **URL:** https://www.chartjs.org/
 - **What it provides:** Crime trend line chart rendering
 - **Cost:** Free, open source
 - **Documentation:** https://www.chartjs.org/docs/
 
-### 4. Font Awesome
+### 5. Font Awesome
 - **URL:** https://fontawesome.com/
 - **What it provides:** Icons used in the UI (download button etc.)
 - **Cost:** Free tier
@@ -68,7 +77,7 @@ naijawatch/
 ```
 
 ---
-e
+
 ## How to Run Locally
 
 1. Clone the repository:
@@ -179,7 +188,7 @@ Create load balancer config:
 sudo nano /etc/nginx/sites-available/naijawatch-lb
 ```
 
-Paste this (replace with your actual IPs):
+Paste this:
 ```nginx
 upstream naijawatch_backend {
     server 44.201.79.14;
@@ -228,7 +237,8 @@ sudo tail -f /var/log/nginx/access.log
 Refresh the app several times — requests should appear on both servers confirming the load balancer is working correctly.
 
 ---
-##  Challenges & Solutions
+
+## Challenges & Solutions
 
 | Challenge | Solution |
 |---|---|
@@ -237,11 +247,13 @@ Refresh the app several times — requests should appear on both servers confirm
 | World Bank API can be slow or unavailable | Built a fallback with static historical data so the chart always renders |
 | City-level trend data unavailable | Built a city estimate feature that adjusts national data using each city's safety factor |
 | CSV export needed without a backend | Used browser Blob API to generate and download CSV entirely client-side |
+| NewsAPI CORS restriction on some browsers | Used direct fetch with API key in query string as per NewsAPI free tier documentation |
 
 ---
 
 ## Credits & Attribution
 
+- **NewsAPI** — https://newsapi.org/ — Live news headlines
 - **World Bank Open Data** — https://data.worldbank.org/
 - **OpenStreetMap Contributors** — https://www.openstreetmap.org/copyright
 - **Leaflet.js** — https://leafletjs.com/
