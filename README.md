@@ -1,12 +1,12 @@
 # 🇳🇬 NaijaWatch — Nigeria Safety Explorer
 
-A web application that allows users to explore crime and safety data across 21 major Nigerian cities. Built with HTML, CSS, and JavaScript using real data from the World Bank API and NewsAPI — no backend required.
+A web application that allows users to explore crime and safety data across 21 major Nigerian cities. Built with HTML, CSS, and JavaScript using real data from the World Bank API and NewsAPI no backend required.
 
 ---
 
 ## Purpose
 
-NaijaWatch helps Nigerians and visitors make informed decisions about safety across different cities in Nigeria. Users can search, filter, sort, and compare cities by safety score, view detailed crime breakdowns including kidnapping rates, read live news headlines for each city, toggle between national and city-estimated crime trends, and export comparison data — all powered by live World Bank and NewsAPI data.
+NaijaWatch helps Nigerians and visitors make informed decisions about safety across different cities in Nigeria. Users can search, filter, sort, and compare cities by safety score, view detailed crime breakdowns including kidnapping rates, read live news headlines for each city, toggle between national and city-estimated crime trends, and export comparison data all powered by live World Bank and NewsAPI data.
 
 ---
 
@@ -20,17 +20,17 @@ NaijaWatch helps Nigerians and visitors make informed decisions about safety acr
   - Safety score and crime index with animated progress bars
   - Safety rank out of all 21 cities
   - Full crime breakdown: Robbery, Violent Crime, Drug Related, Vandalism, Corruption, Home Break-ins, and Kidnapping
-- 📰 **Live News Headlines** — real-time news for each city powered by NewsAPI
-- 🆚 **City Comparison Tool** — compare any two cities side by side
-- 📥 **Export as CSV** — download the comparison data as a spreadsheet
-- 📈 **Crime Trend Chart** — toggle between Nigeria national data and city-level estimates
+- **Live News Headlines** — real-time news for each city powered by NewsAPI
+- **City Comparison Tool** — compare any two cities side by side
+- **Export as CSV** — download the comparison data as a spreadsheet
+- **Crime Trend Chart** — toggle between Nigeria national data and city-level estimates
 - Live homicide trend data from the World Bank API with automatic fallback if API is unavailable
 
 ---
 
 ## APIs & Libraries Used
 
-### 1. NewsAPI ⭐ (Primary External API)
+### 1. NewsAPI (Primary External API)
 - **URL:** https://newsapi.org/
 - **Endpoint:** `https://newsapi.org/v2/everything?q={city}+Nigeria&language=en&sortBy=publishedAt&pageSize=5&apiKey={API_KEY}`
 - **What it provides:** Live real-time news headlines for each Nigerian city
