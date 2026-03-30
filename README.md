@@ -9,6 +9,8 @@ A web application that allows users to explore crime and safety data across 21 m
 NaijaWatch helps Nigerians and visitors make informed decisions about safety across different cities in Nigeria. Users can search, filter, sort, and compare cities by safety score, view detailed crime breakdowns including kidnapping rates, read live news headlines for each city, toggle between national and city-estimated crime trends, and export comparison data all powered by live World Bank and NewsAPI data.
 
 ---
+ **Live Website:** https://mchidozie-pixel.github.io/naijawatch/
+---
 
 ## Features
 
