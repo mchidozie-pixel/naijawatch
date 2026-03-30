@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NaijaWatch — Nigeria Safety Explorer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,39 +14,47 @@
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <span class="logo-flag">🇳🇬</span>
-    <span class="logo-text">NaijaWatch</span>
-    <span class="logo-badge">Safety Explorer</span>
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo">
+      <div class="logo-icon">🇳🇬</div>
+      <div class="logo-text-wrap">
+        <span class="logo-name">NaijaWatch</span>
+        <span class="logo-sub">Safety Explorer</span>
+      </div>
+    </div>
   </div>
+
+  <div class="header-center">
+    <div class="search-wrap">
+      <i class="fas fa-search search-ico"></i>
+      <input type="text" id="citySearch" placeholder="Search any Nigerian city..." oninput="filterCities()"/>
+    </div>
+  </div>
+
   <div class="header-right">
-    <span class="live-dot"></span>
-    <span class="live-label">Live World Bank & News Data</span>
+    <div class="live-pill">
+      <span class="live-dot"></span>
+      Live Data
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">
+      <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
   </div>
 </header>
 
+<!-- MAIN LAYOUT -->
 <div class="app">
 
-  <!-- LEFT PANEL -->
-  <aside class="panel">
-    <div class="section">
-      <h2 class="section-title">Explore Nigeria</h2>
-      <div class="search-wrap">
-        <input type="text" id="citySearch" placeholder="Search city e.g. Lagos..." oninput="filterCities()"/>
-        <span class="search-icon">🔍</span>
-      </div>
-      <div class="filter-row">
-        <label>Sort by</label>
-        <select id="sortSelect" onchange="sortAndRender()">
-          <option value="danger">Most dangerous</option>
-          <option value="safe">Safest first</option>
-          <option value="name">Name A–Z</option>
-          <option value="population">Population</option>
-        </select>
-      </div>
-      <div class="filter-row">
-        <label>Region</label>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- FILTERS -->
+    <div class="sidebar-block">
+      <div class="block-title">Filters</div>
+      <div class="filter-group">
+        <label class="filter-label">Region</label>
         <select id="regionSelect" onchange="filterCities()">
           <option value="all">All regions</option>
           <option value="South West">South West</option>
@@ -57,123 +65,164 @@
           <option value="North Central">North Central</option>
         </select>
       </div>
-    </div>
-
-    <div class="section legend-section">
-      <h2 class="section-title">Safety Legend</h2>
-      <div class="legend">
-        <div class="legend-item"><span class="legend-dot safe"></span>Safe (70–100)</div>
-        <div class="legend-item"><span class="legend-dot moderate"></span>Moderate (40–69)</div>
-        <div class="legend-item"><span class="legend-dot high"></span>High Risk (0–39)</div>
+      <div class="filter-group">
+        <label class="filter-label">Sort by</label>
+        <select id="sortSelect" onchange="sortAndRender()">
+          <option value="danger">Most dangerous</option>
+          <option value="safe">Safest first</option>
+          <option value="name">Name A–Z</option>
+          <option value="population">Population</option>
+        </select>
       </div>
     </div>
 
-    <div class="list-header">
-      Cities <span id="cityCount" class="count-badge">21</span>
+    <!-- LEGEND -->
+    <div class="sidebar-block">
+      <div class="block-title">Safety Scale</div>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-bar safe-bar"></div>
+          <span>Safe <em>70–100</em></span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-bar moderate-bar"></div>
+          <span>Moderate <em>40–69</em></span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-bar danger-bar"></div>
+          <span>High Risk <em>0–39</em></span>
+        </div>
+      </div>
     </div>
-    <div class="city-list" id="cityList"></div>
+
+    <!-- CITY LIST -->
+    <div class="sidebar-block cities-block">
+      <div class="block-title">
+        Cities
+        <span class="count-pill" id="cityCount">21</span>
+      </div>
+      <div class="city-list" id="cityList"></div>
+    </div>
+
   </aside>
 
-  <!-- RIGHT PANEL -->
-  <main class="main">
-    <div class="map-wrap">
-      <div id="map"></div>
+  <!-- MAP AREA -->
+  <div class="map-area">
+    <div id="map"></div>
+
+    <!-- FLOATING WELCOME -->
+    <div class="float-welcome" id="welcomeScreen">
+      <div class="fw-icon">🇳🇬</div>
+      <div class="fw-title">Welcome to NaijaWatch</div>
+      <div class="fw-desc">Click any city pin or select from the list to explore safety data, live news, and crime trends.</div>
+      <div class="fw-stats">
+        <div class="fw-stat">
+          <span>21</span>
+          <small>Cities</small>
+        </div>
+        <div class="fw-stat">
+          <span id="wSafe">—</span>
+          <small>Safest</small>
+        </div>
+        <div class="fw-stat">
+          <span id="wDanger">—</span>
+          <small>Riskiest</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel" id="detailPanel" style="display:none">
+
+    <!-- PANEL HEADER -->
+    <div class="panel-header">
+      <div>
+        <div class="panel-city" id="detailCity"></div>
+        <div class="panel-region" id="detailRegion"></div>
+      </div>
+      <button class="panel-close" onclick="closeDetail()">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
 
-    <!-- CITY DETAIL PANEL -->
-    <div class="detail-panel" id="detailPanel" style="display:none">
-      <div class="detail-header">
-        <div>
-          <h2 class="detail-city" id="detailCity"></h2>
-          <p class="detail-region" id="detailRegion"></p>
-        </div>
-        <button class="close-btn" onclick="closeDetail()">✕</button>
+    <!-- SCORE ROW -->
+    <div class="score-row">
+      <div class="score-tile">
+        <div class="score-val" id="detailSafety" style="color:var(--green)">—</div>
+        <div class="score-lbl">Safety Score</div>
+        <div class="score-track"><div class="score-fill green-fill" id="safetyBar"></div></div>
       </div>
-
-      <!-- SCORE GRID -->
-      <div class="score-grid">
-        <div class="score-card">
-          <div class="score-num green" id="detailSafety">—</div>
-          <div class="score-label">Safety Score</div>
-          <div class="score-bar-wrap"><div class="score-bar green-bar" id="safetyBar"></div></div>
-        </div>
-        <div class="score-card">
-          <div class="score-num red" id="detailCrime">—</div>
-          <div class="score-label">Crime Index</div>
-          <div class="score-bar-wrap"><div class="score-bar red-bar" id="crimeBar"></div></div>
-        </div>
-        <div class="score-card">
-          <div class="score-num blue" id="detailPop">—</div>
-          <div class="score-label">Population</div>
-        </div>
-        <div class="score-card">
-          <div class="score-num yellow" id="detailRank">—</div>
-          <div class="score-label">Safety Rank</div>
-        </div>
+      <div class="score-tile">
+        <div class="score-val" id="detailCrime" style="color:var(--red)">—</div>
+        <div class="score-lbl">Crime Index</div>
+        <div class="score-track"><div class="score-fill red-fill" id="crimeBar"></div></div>
       </div>
-
-      <!-- CRIME BREAKDOWN -->
-      <div class="breakdown-section">
-        <h3 class="sub-title">Crime Breakdown</h3>
-        <div class="breakdown-list" id="breakdownList"></div>
+      <div class="score-tile">
+        <div class="score-val" id="detailPop" style="color:var(--blue)">—</div>
+        <div class="score-lbl">Population</div>
       </div>
-
-      <!-- LIVE NEWS SECTION -->
-      <div class="news-section" id="newsSection" style="display:none">
-        <h3 class="sub-title">
-          📰 Live News
-          <span class="news-badge">NewsAPI</span>
-        </h3>
-        <div class="news-list" id="newsList"></div>
-      </div>
-
-      <!-- COMPARE SECTION -->
-      <div class="compare-section">
-        <div class="compare-header">
-          <h3 class="sub-title">🏙️ City Comparison</h3>
-          <button class="export-btn" onclick="exportComparison()" title="Export as CSV">
-            <i class="fas fa-download"></i>
-          </button>
-        </div>
-        <div class="compare-controls">
-          <select id="compareCityA"></select>
-          <span>vs</span>
-          <select id="compareCityB"></select>
-        </div>
-        <div class="compare-grid">
-          <div class="compare-card" id="compareCardA"></div>
-          <div class="compare-card" id="compareCardB"></div>
-        </div>
-      </div>
-
-      <!-- TREND CHART -->
-      <div class="chart-section">
-        <h3 class="sub-title">
-          📈 Crime Trend
-          <span class="wb-badge">World Bank API</span>
-        </h3>
-        <div class="chart-toggle">
-          <label><input type="radio" name="trendType" value="national" checked onchange="loadTrendChart()"> National</label>
-          <label><input type="radio" name="trendType" value="city" onchange="loadTrendChart()"> City Estimate</label>
-        </div>
-        <canvas id="trendChart"></canvas>
-        <p class="chart-note">Source: World Bank — Intentional homicides per 100,000 people</p>
+      <div class="score-tile">
+        <div class="score-val" id="detailRank" style="color:var(--amber)">—</div>
+        <div class="score-lbl">Safety Rank</div>
       </div>
     </div>
 
-    <!-- WELCOME SCREEN -->
-    <div class="welcome" id="welcomeScreen">
-      <div class="welcome-icon">🇳🇬</div>
-      <h2>Welcome to NaijaWatch</h2>
-      <p>Click any city on the map or from the list to explore safety scores, live news, crime breakdowns, and national trends.</p>
-      <div class="welcome-stats">
-        <div class="w-stat"><span>21</span><small>Cities tracked</small></div>
-        <div class="w-stat"><span id="wSafe">—</span><small>Safest city</small></div>
-        <div class="w-stat"><span id="wDanger">—</span><small>Highest risk</small></div>
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('breakdown', this)">Breakdown</button>
+      <button class="tab" onclick="switchTab('news', this)">Live News</button>
+      <button class="tab" onclick="switchTab('compare', this)">Compare</button>
+      <button class="tab" onclick="switchTab('trend', this)">Trend</button>
+    </div>
+
+    <!-- TAB: BREAKDOWN -->
+    <div class="tab-panel active" id="tab-breakdown">
+      <div class="breakdown-list" id="breakdownList"></div>
+    </div>
+
+    <!-- TAB: NEWS -->
+    <div class="tab-panel" id="tab-news">
+      <div class="news-list" id="newsList">
+        <div class="loading-row">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
       </div>
     </div>
 
-  </main>
+    <!-- TAB: COMPARE -->
+    <div class="tab-panel" id="tab-compare">
+      <div class="compare-controls">
+        <select id="compareCityA"></select>
+        <div class="vs-badge">VS</div>
+        <select id="compareCityB"></select>
+      </div>
+      <button class="export-btn" onclick="exportComparison()">
+        <i class="fas fa-download"></i> Export CSV
+      </button>
+      <div class="compare-grid">
+        <div class="compare-card" id="compareCardA"></div>
+        <div class="compare-card" id="compareCardB"></div>
+      </div>
+    </div>
+
+    <!-- TAB: TREND -->
+    <div class="tab-panel" id="tab-trend">
+      <div class="trend-toggle">
+        <label class="radio-label">
+          <input type="radio" name="trendType" value="national" checked onchange="loadTrendChart()">
+          National
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="trendType" value="city" onchange="loadTrendChart()">
+          City Estimate
+        </label>
+      </div>
+      <canvas id="trendChart"></canvas>
+      <p class="chart-note">Source: World Bank API — Intentional homicides per 100,000 people</p>
+    </div>
+
+  </div>
 </div>
 
 <script src="app.js"></script>
